@@ -175,7 +175,7 @@ class PlayScene extends Phaser.Scene {
           sprite = "skin-4";
           break;
       }
-      this.addAnswer(160 * i + 490, sprite);
+      this.addAnswer(170 * i + 490, sprite);
     }
     this.setCorrectAnswer();
   }

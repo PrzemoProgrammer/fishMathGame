@@ -6,6 +6,7 @@ class Answer {
     this.sprite = sprite;
 
     this.randomSpeed = Math.floor(Phaser.Math.Between(10000, 15000));
+    this.swimmingDirection = this.setDirect();
 
     this.answer = this.getRandomAnswer();
     this.background = this.scene.add.sprite(0, 0, this.sprite);
@@ -13,7 +14,7 @@ class Answer {
     this.displayText = this.scene.add
       .text(
         this.background.x + this.background.displayWidth / 2 - 29,
-        this.background.y,
+        this.background.y - 80,
         this.answer,
         {
           fontFamily: "LuckiestGuy",
@@ -36,7 +37,6 @@ class Answer {
 
     this.background.play(this.sprite, true);
     this.container.setScale(0);
-    // this.background.setSize(100);
 
     this.respawnAnim();
   }
@@ -52,25 +52,47 @@ class Answer {
   }
 
   move() {
-    this.moveLeft = this.scene.tweens.add({
+    let x = null;
+    if (this.swimmingDirection === "right") {
+      this.background.flipX = true;
+      this.displayText.x += 20;
+      x = 1800;
+    } else {
+      this.displayText.x -= 20;
+      x = 100;
+      this.background.flipX = false;
+    }
+
+    this.direction = this.scene.tweens.add({
       targets: this.container,
-      x: 100,
+      x: x,
       duration: this.randomSpeed,
       onComplete: () => {
         this.background.flipX = true;
         this.displayText.x += 20;
-        this.moveBack();
+        this.moveBack(this.swimmingDirection);
       },
     });
   }
 
-  moveBack() {
-    this.moveRight = this.scene.tweens.add({
+  moveBack(swimmingDirection) {
+    let x = null;
+    if (swimmingDirection === "right") {
+      this.displayText.x -= 20;
+      x = 100;
+      this.background.flipX = false;
+    } else {
+      this.background.flipX = true;
+      this.displayText.x += 20;
+      x = 1800;
+    }
+
+    this.changedDirection = this.scene.tweens.add({
       targets: this.container,
-      x: 1800,
+      x: x,
       duration: this.randomSpeed,
       onComplete: () => {
-        this.moveLeft.stop();
+        this.direction.stop();
         this.background.flipX = false;
         this.displayText.x -= 20;
         this.move();
@@ -114,5 +136,20 @@ class Answer {
       scale: 0,
       duration: 2000,
     });
+  }
+
+  setDirect() {
+    let randomNumber = Math.floor(Phaser.Math.Between(0, 1));
+
+    let direction = null;
+    switch (randomNumber) {
+      case 0:
+        direction = "right";
+        break;
+      case 1:
+        direction = "left";
+        break;
+    }
+    return direction;
   }
 }
