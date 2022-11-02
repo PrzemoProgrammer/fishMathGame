@@ -9,6 +9,10 @@ class PlayScene extends Phaser.Scene {
     this.load.image("operationBackground", "operationBackground.png");
     this.load.image("viewfinder", "viewfinder.png");
     this.load.image("full-screen", "full-screen.png");
+    this.load.image("muteIcon", "muteIcon.png");
+    this.load.image("unmuteIcon", "unmuteIcon.png");
+    this.load.image("lostScreen", "lostScreen.png");
+    this.load.image("restartButton", "restartButton.png");
 
     this.load.spritesheet("skin1", "skin1.png", {
       frameWidth: 1716 / 10,
@@ -32,6 +36,7 @@ class PlayScene extends Phaser.Scene {
 
     this.load.audio("shoot", "audio/shoot.mp3");
     this.load.audio("missClick", "audio/missClick.mp3");
+    this.load.audio("waterSound", "audio/waterSound.mp3");
   }
 
   create() {
@@ -40,6 +45,8 @@ class PlayScene extends Phaser.Scene {
 
     this.answers = [];
     this.score = 0;
+    this.isMute = false;
+    this.isMouseBlock = false;
 
     this.anims.create({
       key: "skin-1",
@@ -75,11 +82,17 @@ class PlayScene extends Phaser.Scene {
     this.addAnswers();
     this.addScoreText();
     this.addViewfinder();
+    this.addMusicButton();
 
     this.shootAudio = this.sound.add("shoot");
     this.shootAudio.volume = 0.2;
 
     this.missClickAudio = this.sound.add("missClick");
+    this.waterSoundAudio = this.sound.add("waterSound");
+    this.waterSoundAudio.loop = true;
+    this.waterSoundAudio.volume = 0.5;
+
+    this.waterSoundAudio.play();
   }
 
   update() {
@@ -182,6 +195,7 @@ class PlayScene extends Phaser.Scene {
 
   setClickAble(answer) {
     answer.onClick(() => {
+      if (this.isMouseBlock) return;
       this.shootAudio.play();
       this.viewfinderAnim();
       this.answers.forEach((answer) => answer.runAway());
@@ -191,21 +205,19 @@ class PlayScene extends Phaser.Scene {
       ) {
         this.updateScore();
         answer.dead();
+        this.addNewOperation(1500);
         console.log("correct");
       } else {
+        this.isMouseBlock = true;
         this.missClickAudio.play();
         this.resetScore();
+        this.addLostScreen();
         console.log("wrong");
       }
       this.operation.animateMoveBack(() => {
         this.operation.container.destroy();
         this.removeAnswers();
       });
-
-      this.newOperation = setTimeout(() => {
-        this.addOperation();
-        this.addAnswers();
-      }, 2000);
     });
   }
 
@@ -247,5 +259,39 @@ class PlayScene extends Phaser.Scene {
   resetScore() {
     this.score = 0;
     this.scoreText.setText("score " + this.score);
+  }
+
+  addMusicButton() {
+    this.muteButton = this.add.image(this.gw - 200, 60, "unmuteIcon");
+    this.muteButton.setInteractive();
+
+    this.muteButton.on("pointerup", () => {
+      if (this.isMute) {
+        this.isMute = false;
+        this.waterSoundAudio.play();
+        this.muteButton.setTexture("unmuteIcon");
+      } else {
+        this.isMute = true;
+        this.waterSoundAudio.stop();
+        this.muteButton.setTexture("muteIcon");
+      }
+    });
+  }
+
+  addLostScreen() {
+    this.lostScreen = new LostScreen(this, 0, 0, "lostScreen");
+
+    this.lostScreen.button.on("pointerup", () => {
+      this.isMouseBlock = false;
+      this.lostScreen.container.destroy();
+      this.addNewOperation(0);
+    });
+  }
+
+  addNewOperation(time) {
+    this.newOperation = setTimeout(() => {
+      this.addOperation();
+      this.addAnswers();
+    }, time);
   }
 }
