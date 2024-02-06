@@ -9,16 +9,36 @@
       * {
         font-family: "LuckiestGuy";
       }
+      html,
+      body {
+        background:  #511ba1; 
+      }
+      #loadingIcon {
+        position: absolute;
+        top: 60%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: auto;
+        height: auto;
+        max-width: 20%;
+        max-height: 20%;
+        object-fit: cover;
+      }
     </style>
     <script src="//cdn.jsdelivr.net/npm/phaser@3.55.2/dist/phaser.min.js"></script>
   </head>
   <body>
+    <div id="loading_page">
+      <img
+        id="loadingIcon"
+        src="https://i.gifer.com/XOsX.webp"
+        alt="Loading_icon"
+      />
+    </div>
     <script src="./src/scenes/PlayScene.js"></script>
     <script src="./src/index.js"></script>
     <script src="./src/LostScreen.js"></script>
     <script src="./src/Operation.js"></script>
     <script src="./src/Answer.js"></script>
-
-
   </body>
 </html>

@@ -93,6 +93,7 @@ class PlayScene extends Phaser.Scene {
     this.waterSoundAudio.volume = 0.5;
 
     this.waterSoundAudio.play();
+    document.getElementById("loading_page")?.remove();
   }
 
   update() {
